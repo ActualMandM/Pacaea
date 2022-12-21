@@ -71,13 +71,23 @@ class Main
 				continue;
 			}
 
-			var folders = FileSystem.readDirectory('data/${groups[i]}');
+			var folders:Array<String> = FileSystem.readDirectory('data/${groups[i]}');
 
 			for (folder in folders)
 			{
-				var files = FileSystem.readDirectory('data/${groups[i]}/$folder');
-
+				var files:Array<String> = [];
 				var j:Int = 0;
+
+				if (FileSystem.isDirectory('data/${groups[i]}/$folder'))
+				{
+					files = FileSystem.readDirectory('data/${groups[i]}/$folder');
+				}
+				else
+				{
+					j = group.OrderedEntries.length;
+					createEntry(pack, group, i, j, 'data/${groups[i]}/$folder');
+				}
+
 				for (file in files)
 				{
 					if (FileSystem.isDirectory('data/${groups[i]}/$folder/$file'))
@@ -88,6 +98,7 @@ class Main
 					}
 
 					createEntry(pack, group, i, j, 'data/${groups[i]}/$folder/$file');
+					j++;
 				}
 			}
 
