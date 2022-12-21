@@ -12,4 +12,4 @@ haxe build.hxml
 Afterwards, the compiled file will be in `bin/bin/Main.exe`.
 
 ## Usage
-Set up a data folder next to `Main.exe` then run the executable. The packer will generate a arc.json and arc.pack.
+Set up a data folder next to `Main.exe` then run the executable. The packer will generate `arc.json` and `arc.pack`.

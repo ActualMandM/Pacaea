@@ -76,7 +76,6 @@ class Main
 			for (folder in folders)
 			{
 				var files:Array<String> = [];
-				var j:Int = 0;
 
 				if (FileSystem.isDirectory('data/${groups[i]}/$folder'))
 				{
@@ -84,21 +83,18 @@ class Main
 				}
 				else
 				{
-					j = group.OrderedEntries.length;
-					createEntry(pack, group, i, j, 'data/${groups[i]}/$folder');
+					createEntry(pack, group, i, 'data/${groups[i]}/$folder');
 				}
 
 				for (file in files)
 				{
 					if (FileSystem.isDirectory('data/${groups[i]}/$folder/$file'))
 					{
-						loop = 0;
-						recursiveLoop(pack, group, i, j, 'data/${groups[i]}/$folder/$file');
+						recursiveLoop(pack, group, i, 'data/${groups[i]}/$folder/$file');
 						continue;
 					}
 
-					createEntry(pack, group, i, j, 'data/${groups[i]}/$folder/$file');
-					j++;
+					createEntry(pack, group, i, 'data/${groups[i]}/$folder/$file');
 				}
 			}
 
@@ -109,43 +105,34 @@ class Main
 		File.saveBytes("arc.pack", pack.getBytes());
 	}
 
-	static var loop:Int = 0;
-
-	static function recursiveLoop(pack:BytesBuffer, group:Group, i:Int, j:Int, directory:String):Void
+	static function recursiveLoop(pack:BytesBuffer, group:Group, i:Int, directory:String):Void
 	{
 		if (FileSystem.exists(directory))
 		{
-			if (FileSystem.isDirectory(directory))
+			for (file in FileSystem.readDirectory(directory))
 			{
-				for (file in FileSystem.readDirectory(directory))
+				var path = Path.join([directory, file]);
+				if (!FileSystem.isDirectory(path))
 				{
-					var path = Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path))
-					{
-						createEntry(pack, group, i, j, path);
-						j++;
-						loop = j;
-					}
-					else
-					{
-						var directory = Path.addTrailingSlash(path);
-						recursiveLoop(pack, group, i, loop, directory);
-					}
+					createEntry(pack, group, i, path);
 				}
-			}
-			else
-			{
-				createEntry(pack, group, i, j, directory);
+				else
+				{
+					var directory = Path.addTrailingSlash(path);
+					recursiveLoop(pack, group, i, directory);
+				}
 			}
 		}
 	}
 
-	static function createEntry(pack:BytesBuffer, group:Group, i:Int, j:Int, directory:String)
+	static function createEntry(pack:BytesBuffer, group:Group, i:Int, directory:String)
 	{
+		var length:Int = group.OrderedEntries.length;
+
 		var data:Bytes = File.getBytes(directory);
 
-		var prevLengthEnt:Int = (j > 0) ? group.OrderedEntries[j - 1].Length : 0;
-		var prevOffsetEnt:Int = (j > 0) ? group.OrderedEntries[j - 1].Offset : 0 + group.Offset;
+		var prevLengthEnt:Int = (length > 0) ? group.OrderedEntries[length - 1].Length : 0;
+		var prevOffsetEnt:Int = (length > 0) ? group.OrderedEntries[length - 1].Offset : 0 + group.Offset;
 
 		var entry:Entry = {
 			"OriginalFilename": directory.split('data/${groups[i]}/')[1],
@@ -155,7 +142,7 @@ class Main
 
 		pack.add(data);
 		group.Length += entry.Length;
-		group.OrderedEntries[j] = entry;
+		group.OrderedEntries[length] = entry;
 	}
 
 	inline static function print(text:String):Void
