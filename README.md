@@ -1,5 +1,5 @@
 # Pacaea
-A file packer for a Switch rhythm game.
+A file packer for Arcaea (Nintendo Switch).
 
 ## Compilation
 In order to compile, you'll need to install [Haxe](https://haxe.org/download/).
